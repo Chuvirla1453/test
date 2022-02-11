@@ -13,14 +13,19 @@ def index():
     return "И на Марсе будут яблони цвести!"
 
 
-@app.route('/promotion_image')
-def prom_image():
+@app.route('/promotion')
+def promotion():
     a = ['Человечество вырастает из детства.',
          'Человечеству мала одна планета.',
          'Мы сделаем обитаемыми безжизненные пока планеты.',
          'И начнем с Марса!',
          'Присоединяйся!'
          ]
+    return '</br>'.join(a)
+
+
+@app.route('/image_mars')
+def image():
     return f"""<!doctype html>
                 <html lang="en">
                   <head>
@@ -30,7 +35,7 @@ def prom_image():
                   <body>
                     <h1>Жди нас, Марс!</h1>
                     <img src="{url_for('static', filename='img/mars.png')}">
-                    {'</br>'.join(a)}
+                    <p>Это колбаса на самом деле</p>
                   </body>
                 </html>"""
 
