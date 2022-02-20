@@ -10,17 +10,18 @@
     <title>{{title}}</title>
 </head>
 <body>
-<!-- Just an image -->
     <nav class="navbar navbar-dark" style="background-color: #0a0a0a;">
       <a class="navbar-brand" href="#">
           <h1>
-        <img src="{{image_url}}" width="60" height="60" alt="">
+        <img src="{{mars_image_url}}" width="60" height="60" alt="">
           Миссия колонизации марса</h1>
       </a>
         <span class="navbar-text">
             <h4>И на Марсе будут яблони цвести!</h4>
         </span>
 </nav>
-
+<main role="main" class="container">
+            {% block content %}{% endblock %}
+</main>
 </body>
 </html>
