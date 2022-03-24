@@ -1,5 +1,6 @@
 from flask import Flask
 from data import db_session, users, jobs
+import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ghjmvghjmnvghjmvnfgc'
@@ -65,6 +66,13 @@ def main():
     USER['address'] = ['module_1', 'module_2', 'module_1', 'medical_module']
     USER['email'] = ['scott_chief@mars.org', 'jack_daniel@mars.org', 'teddy_sanders@mars.org', 'desert_fox@mars.org']
     add_user(USER)
+    JOB['team_leader'] = [1]
+    JOB['job'] = ['deployment of residential modules 1 and 2']
+    JOB['work_size'] = [15]
+    JOB['collaborators'] = ['2, 3, 4']
+    JOB['is_finished'] = [False]
+    JOB['start_date'] = [datetime.datetime.now()]
+    add_job(JOB)
     # app.run()
 
 
