@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <title>Work Log</title>
+</head>
+<body>
+    {% extends "base.html" %}
+
+    {% block content %}
+    <h1 style="text-allign:center">Works log</h1>
+    {% for i in table_data %}
+        <h3>Action # {{i[0]}}</h3>
+        <table class="table">
+          <thead>
+            <tr class="table-active">
+              <th>Title of activity</th>
+              <th>Team Leader</th>
+              <th>Duration</th>
+              <th>List of collaborators</th>
+              <th>is finished</th>
+            </tr>
+          </thead>
+            <tbody>
+            <tr>
+                <td class="table-info">{{i[1]}}</td>
+                <td class="table-info">{{i[2]}}</td>
+                <td class="table-info">{{i[3]}}</td>
+                <td class="table-info">{{i[4]}}</td>
+                {% if i[5] == 0 %}
+                    <td class="table-danger">is not finished</td>
+                {% else %}
+                    <td class="table-success">is finished</td>
+                {% endif %}
+            </tr>
+            </tbody>
+        </table>
+    {% endfor %}
+    {% endblock %}
+
+</body>
+</html>

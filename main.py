@@ -1,15 +1,17 @@
-from flask import Flask
+from flask import Flask, render_template, url_for
 from data import db_session, users, jobs
 import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ghjmvghjmnvghjmvnfgc'
+
 USER = {'surname': [None], 'name': [None], 'age': [None],
         'position': [None], 'speciality': [None], 'address': [None],
         'email': [None]}
 JOB = {'team_leader': [None], 'job': [None], 'work_size': [None],
        'collaborators': [None], 'start_date': [None],
        'finish_date': [None], 'is_finished': [None]}
+params = {}
 
 
 def clear_user():
@@ -24,6 +26,22 @@ def clear_job():
     JOB = {'team_leader': None, 'job': None, 'work_size': None,
            'collaborators': None, 'start_date': None,
            'finish_date': None, 'is_finished': None}
+
+
+@app.route('/')
+def work_log():
+    global params
+    params["mars_image_url"] = url_for('static', filename='img/mars.jpg')
+    db_sess = db_session.create_session()
+
+    output = []
+    for job in db_sess.query(jobs.Jobs):
+        output.append([job.id, job.job, db_sess.query(users.User).filter(users.User.id == job.team_leader)[0].name +
+                       ' ' + db_sess.query(users.User).filter(users.User.id == job.team_leader)[0].surname,
+                       str(job.work_size) + ' hours', job.collaborators,
+                       job.is_finished])
+    params['table_data'] = output
+    return render_template('work_log.html', **params)
 
 
 def add_user(us):
@@ -57,23 +75,8 @@ def add_job(j):
 
 
 def main():
-    db_session.global_init("db/mars_explorer.db")
-    USER['surname'] = ['Scott', 'Daniel', 'Sanders', 'Rommel']
-    USER['name'] = ['Ridley', 'Jack', 'Teddy', 'Erwin']
-    USER['age'] = [21, 32, 45, 50]
-    USER['position'] = ['captain', 'flight engineer', 'flight controller', 'doctor']
-    USER['speciality'] = ['research engineer', 'flight engineer', 'programmer', 'radiation protection specialist']
-    USER['address'] = ['module_1', 'module_2', 'module_1', 'medical_module']
-    USER['email'] = ['scott_chief@mars.org', 'jack_daniel@mars.org', 'teddy_sanders@mars.org', 'desert_fox@mars.org']
-    add_user(USER)
-    JOB['team_leader'] = [1]
-    JOB['job'] = ['deployment of residential modules 1 and 2']
-    JOB['work_size'] = [15]
-    JOB['collaborators'] = ['2, 3, 4']
-    JOB['is_finished'] = [False]
-    JOB['start_date'] = [datetime.datetime.now()]
-    add_job(JOB)
-    # app.run()
+    db_session.global_init('db/mars_explorer.db')
+    app.run()
 
 
 if __name__ == '__main__':
