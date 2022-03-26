@@ -11,15 +11,25 @@
 </head>
 <body>
     <nav class="navbar navbar-dark" style="background-color: #0a0a0a;">
-      <a class="navbar-brand" href="#">
+      <a class="navbar-brand" href="/">
           <h1>
         <img src="{{mars_image_url}}" width="60" height="60" alt="">
           Миссия колонизации марса</h1>
+          <h4><font color="grey">И на Марсе будут яблони цвести!</font></h4>
       </a>
-        <span class="navbar-text">
-            <h4>И на Марсе будут яблони цвести!</h4>
-        </span>
+        {% if current_user.is_authenticated %}
+            <span class="navbar-text">
+                <h4>{{current_user.name}}</h4>
+                <p><a class="btn btn-outline-danger " href="/logout"><font color="red">Выйти</font></a></p>
+            </span>
+        {% else %}
+            <p>
+                <a class="btn btn-outline-primary " href="/register">Зарегистрироваться</a>
+                <a class="btn btn-outline-success" href="/login">Войти</a>
+            </p>
+        {% endif %}
 </nav>
+
 <main role="main" class="container">
             {% block content %}{% endblock %}
 </main>
