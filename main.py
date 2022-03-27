@@ -1,5 +1,6 @@
-from flask import Flask, render_template, url_for
-from flask_login import LoginManager, login_user, login_required, logout_user
+from flask import Flask, render_template, url_for, request
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 
 from data import db_session, users, jobs
@@ -12,58 +13,7 @@ app.config['SECRET_KEY'] = 'ghjmvghjmnvghjmvnfgc'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-USER = {'surname': [None], 'name': [None], 'age': [None],
-        'position': [None], 'speciality': [None], 'address': [None],
-        'email': [None]}
-JOB = {'team_leader': [None], 'job': [None], 'work_size': [None],
-       'collaborators': [None], 'start_date': [None],
-       'finish_date': [None], 'is_finished': [None]}
 params = {}
-
-
-def clear_user():
-    global USER
-    USER = {'surname': None, 'name': None, 'age': None,
-            'position': None, 'speciality': None, 'address': None,
-            'email': None}
-
-
-def clear_job():
-    global JOB
-    JOB = {'team_leader': None, 'job': None, 'work_size': None,
-           'collaborators': None, 'start_date': None,
-           'finish_date': None, 'is_finished': None}
-
-
-def add_user(us):
-    db_sess = db_session.create_session()
-    for i in range(len(us['name'])):
-        user = users.User()
-        user.surname = us['surname'][i]
-        user.name = us['name'][i]
-        user.age = us['age'][i]
-        user.position = us['position'][i]
-        user.speciality = us['speciality'][i]
-        user.address = us['address'][i]
-        user.email = us['email'][i]
-        db_sess.add(user)
-    db_sess.commit()
-
-
-def add_job(j):
-    db_sess = db_session.create_session()
-    job = jobs.Jobs()
-    for i in range(len(j['job'])):
-        job.job = j['job'][i]
-        job.work_size = j['work_size'][i]
-        job.collaborators = j['collaborators'][i]
-        job.start_date = j['start_date'][i]
-        job.finish_date = j['finish_date'][i]
-        job.is_finished = j['is_finished'][i]
-        job.team_leader = j['team_leader'][i]
-        db_sess.add(job)
-        db_sess.commit()
 
 
 @app.route('/')
@@ -77,7 +27,7 @@ def work_log():
         output.append([job.id, job.job, db_sess.query(users.User).filter(users.User.id == job.team_leader)[0].name +
                        ' ' + db_sess.query(users.User).filter(users.User.id == job.team_leader)[0].surname,
                        str(job.work_size) + ' hours', job.collaborators,
-                       job.is_finished])
+                       job.is_finished, job.user])
     params['table_data'] = output
     return render_template('work_log.html', **params)
 
@@ -150,7 +100,62 @@ def add_work():
         db_sess.add(job)
         db_sess.commit()
         return redirect("/")
-    return render_template('add_work.html', form=form, **params)
+    return render_template('add_work.html', title='Добавление работы', form=form, **params)
+
+
+@app.route('/job/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_job(id):
+    form = AddJobForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        job = db_sess.query(jobs.Jobs).filter(jobs.Jobs.id == id,
+                                              ((jobs.Jobs.user == current_user) | (current_user.position == 'captain'))
+                                          ).first()
+        if job:
+            form.job.data = job.job
+            form.work_size.data = job.work_size
+            form.collaborators.data = job.collaborators
+            form.start_date.data = job.start_date
+            form.finish_date.data = job.finish_date
+            form.is_finished.data = job.is_finished
+            form.team_leader.data = job.team_leader
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        job = db_sess.query(jobs.Jobs).filter(jobs.Jobs.id == id,
+                                              ((jobs.Jobs.user == current_user) | (current_user.position == 'captain'))
+                                              ).first()
+        if job:
+            job.job = form.job.data
+            job.work_size = form.work_size.data
+            job.collaborators = form.collaborators.data
+            job.start_date = form.start_date.data
+            job.finish_date = form.finish_date.data
+            job.is_finished = form.is_finished.data
+            job.team_leader = form.team_leader.data
+            db_sess.commit()
+            return redirect("/")
+        else:
+            abort(404)
+
+    return render_template('add_work.html',title='Редактирование работы', form=form, **params)
+
+
+@app.route('/job_delete/<int:id>')
+@login_required
+def job_delete(id):
+    db_sess = db_session.create_session()
+    job = db_sess.query(jobs.Jobs).filter(jobs.Jobs.id == id,
+                                          ((jobs.Jobs.user == current_user) | (current_user.position == 'captain'))
+                                          ).first()
+    if job:
+        db_sess.delete(job)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/')
 
 
 @login_manager.user_loader
@@ -166,3 +171,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    

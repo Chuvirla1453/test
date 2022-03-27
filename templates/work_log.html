@@ -13,7 +13,7 @@
     {% extends "base.html" %}
 
     {% block content %}
-    <h1 style="text-allign:center">Works log</h1>
+    <h1 style="text-allign:center">Works log  {{current_user.position}}</h1>
     <p><a class="btn btn-outline-secondary " href="/add_work">Добавить РАБоту</a></p>
     {% for i in table_data %}
         <h3>Action # {{i[0]}}</h3>
@@ -41,6 +41,16 @@
             </tr>
             </tbody>
         </table>
+        {% if current_user.is_authenticated and current_user == i[6] or current_user.position == 'captain' %}
+            <div>
+                <a href="/job/{{ i[0] }}" class="btn btn-warning">
+                    Изменить
+                </a>
+                <a href="/job_delete/{{ i[0] }}" class="btn btn-danger">
+                    Удалить
+                </a>
+            </div>
+        {% endif %}
     {% endfor %}
     {% endblock %}
 
